@@ -17,7 +17,6 @@ const movies = [
     { title: 'الإرهاب والكباب‎', year: 1992, rating: 6.2 }
 ]
 
-
 app.get('/', (req, res) => {
   res.send('ok')
 })
@@ -49,6 +48,15 @@ app.get('/movies/add', (req, res) => {
 })
 app.get('/movies/get', (req, res) => {
     res.send({status:200, data:movies})
+})
+app.get('/movies/get/by-date', (req, res) => {
+    res.send({status:200, data:movies.sort(function(a, b){return a.year - b.year}),})
+})
+app.get('/movies/get/by-rating', (req, res) => {
+    res.send({status:200, data:movies.sort(function(a, b){return b.rating - a.rating}),})
+})
+app.get('/movies/get/by-title', (req, res) => {
+    res.send({status:200, data:movies.sort(function(a, b){return a.title - b.title}),})
 })
 app.get('/movies/edit', (req, res) => {
     res.send()
