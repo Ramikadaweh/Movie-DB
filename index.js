@@ -58,6 +58,11 @@ app.get('/movies/get/by-rating', (req, res) => {
 app.get('/movies/get/by-title', (req, res) => {
     res.send({status:200, data:movies.sort(function(a, b){return a.title - b.title}),})
 })
+app.get('/movies/get/id/:id', (req, res) => {  
+    req.params.id <= movies.length ?
+    res.send({ status: 200, data: movies[req.params.id - 1] }) :
+    res.status(404).json({ status: 404, error: true, message: `the movie ${req.params.id} does not exist` }) 
+})
 app.get('/movies/edit', (req, res) => {
     res.send()
 })
