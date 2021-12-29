@@ -17,6 +17,7 @@ const movies = [
     { title: 'الإرهاب والكباب‎', year: 1992, rating: 6.2 }
 ]
 
+
 app.get('/', (req, res) => {
   res.send('ok')
 })
@@ -43,8 +44,18 @@ app.get('/search', (req, res) => {
     }) : res.status(500).json({ status: 500, error: true, message: "you have to provide a search" });
 })
 
-app.get('/movies/add', (req, res) => {
-    res.send()
+var newMovie=app.get('/movies/add', (req, res) => {
+    const title=req.query.title;
+    const year=(req.query.year);
+    const rating=Number(req.query.rating) ? Number(req.query.rating) : 4;
+
+    (title && year && Number(year) && year.length==4) ?
+    movies.push({ 'title': title, 'year': Number(year), 'rating': rating }) &
+    res.send({title,year,rating}) :
+    res.send({ status: 403, error: true, message: 'you cannot create a movie without providing a title and a year' })
+    
+
+    
 })
 app.get('/movies/get', (req, res) => {
     res.send({status:200, data:movies})
