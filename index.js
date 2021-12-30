@@ -44,18 +44,15 @@ app.get('/search', (req, res) => {
     }) : res.status(500).json({ status: 500, error: true, message: "you have to provide a search" });
 })
 
-var newMovie=app.get('/movies/add', (req, res) => {
+app.get('/movies/add', (req, res) => {
     const title=req.query.title;
-    const year=(req.query.year);
+    const year=req.query.year;
     const rating=Number(req.query.rating) ? Number(req.query.rating) : 4;
 
     (title && year && Number(year) && year.length==4) ?
     movies.push({ 'title': title, 'year': Number(year), 'rating': rating }) &
     res.send({title,year,rating}) :
-    res.send({ status: 403, error: true, message: 'you cannot create a movie without providing a title and a year' })
-    
-
-    
+    res.send({ status: 403, error: true, message: 'you cannot create a movie without providing a title and a year' }) 
 })
 app.get('/movies/get', (req, res) => {
     res.send({status:200, data:movies})
@@ -77,8 +74,12 @@ app.get('/movies/get/id/:id', (req, res) => {
 app.get('/movies/edit', (req, res) => {
     res.send()
 })
-app.get('/movies/delete', (req, res) => {
-    res.send()
+app.get('/movies/delete/:id', (req, res) => {
+    de=req.params.id;
+    de <= movies.length ?
+    movies.splice(de, 1) &
+    res.send('the movie '+de+' deleted') :
+    res.send('{status:404, error:true, message:the movie '+de+' does not exist}')
 })
 
 app.listen(port, () => {
