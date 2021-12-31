@@ -71,8 +71,24 @@ app.get('/movies/get/id/:id', (req, res) => {
     res.send({ status: 200, data: movies[req.params.id - 1] }) :
     res.status(404).json({ status: 404, error: true, message: `the movie ${req.params.id} does not exist` }) 
 })
-app.get('/movies/edit', (req, res) => {
-    res.send()
+app.get('/movies/edit/:id', (req, res) => {
+    ed=req.params.id;
+    ti=req.query.title;
+    ra=Number(req.query.rating);
+
+    if(ed <= movies.length && ti) {
+        movies[ed].title = ti;
+        res.send('movie '+ed+' edited');
+    }
+    if (ed <= movies.length && ti && ra) {
+        movies[ed].title = ti;
+        movies[ed].rating = ra;
+        res.send('movie '+ed+' edited');
+    } 
+    else {
+        res.send('{status:404, error:true, message:the movie '+ed+' does not exist}')
+    }
+    
 })
 app.get('/movies/delete/:id', (req, res) => {
     de=req.params.id;
