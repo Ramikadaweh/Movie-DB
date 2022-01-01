@@ -44,7 +44,7 @@ app.get('/search', (req, res) => {
     }) : res.status(500).json({ status: 500, error: true, message: "you have to provide a search" });
 })
 
-app.get('/movies/add', (req, res) => {
+app.post('/movies/add', (req, res) => {
     const title=req.query.title;
     const year=req.query.year;
     const rating=Number(req.query.rating) ? Number(req.query.rating) : 4;
@@ -71,7 +71,7 @@ app.get('/movies/get/id/:id', (req, res) => {
     res.send({ status: 200, data: movies[req.params.id - 1] }) :
     res.status(404).json({ status: 404, error: true, message: `the movie ${req.params.id} does not exist` }) 
 })
-app.get('/movies/edit/:id', (req, res) => {
+app.put('/movies/edit/:id', (req, res) => {
     ed=req.params.id;
     ti=req.query.title;
     ra=Number(req.query.rating);
@@ -90,7 +90,7 @@ app.get('/movies/edit/:id', (req, res) => {
     }
     
 })
-app.get('/movies/delete/:id', (req, res) => {
+app.delete('/movies/delete/:id', (req, res) => {
     de=req.params.id;
     de <= movies.length ?
     movies.splice(de, 1) &
