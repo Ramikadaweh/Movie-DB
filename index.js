@@ -1,103 +1,137 @@
-const express = require('express')
-const app = express()
-const port = 3000
+var express = require("express");
+var app = express();
+var port = 8000;
+app.listen(port, () => {
+    console.log("Server listening on port " + port);
+});
+
+var bodyParser = require('body-parser');
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+var mongoose = require("mongoose");
+const dbe = require('./config/db');
+mongoose.connect(dbe.url);
+
+var db = mongoose.connection; 
+db.on('error', console.error.bind(console, 'connectionasdf error:'));
+ 
+db.once('open', function() {
+  console.log("Successfully connected to MongoDB!");
+});
+
+
+const nameSchema = new mongoose.Schema({
+    movies: [{title: String,
+    year: Number,
+    rating:Number}]
+});
+const moviedb = mongoose.model("movie", nameSchema);
 
 var hour = new Date().getHours();
 var second = new Date().getSeconds();
-const test = {
-    status:200, message:"ok"
-};
-const time = {
-    status:200, message:hour+':'+second
-};
-const movies = [
+const time = { status:200, message:hour+':'+second };
+
+const movie=new moviedb({
+    movies : [
     { title: 'Jaws', year: 1975, rating: 8 },
     { title: 'Avatar', year: 2009, rating: 7.8 },
     { title: 'Brazil', year: 1985, rating: 8 },
     { title: 'الإرهاب والكباب‎', year: 1992, rating: 6.2 }
-]
-
-
-app.get('/', (req, res) => {
-  res.send('ok')
+    ]
+    
 })
+    
+ 
+app.get("/", (req, res) => {
+res.send("Hello World");
+});
 
-app.get('/test', (req, res) => {
-    res.send(test)
-})
+app.get("/test", (req, res) => {
+    res.send({status:200, message:"ok"});
+});
 
-app.get('/time', (req, res) => {
-    res.send(time)
-})
+app.get("/time", (req, res) => {
+    res.send(time);
+});
 
 app.get('/hello/:id', (req, res) => {
     res.send({
-        status:200, message:`hello,${req.params.id}`
-    })
-})
+    status:200, message:`hello,${req.params.id}` })
+});
 
 app.get('/search', (req, res) => {
     const {s}=req.query;
     s ?
     res.send({
-        status: 200, message: "ok", data: s 
+    status: 200, message: "ok", data: s 
     }) : res.status(500).json({ status: 500, error: true, message: "you have to provide a search" });
-})
+});
+
+app.get('/movies/get', (req, res) => {
+    res.send({status:200, data:movie.movies})
+    
+});
 
 app.post('/movies/add', (req, res) => {
     const title=req.query.title;
     const year=req.query.year;
     const rating=Number(req.query.rating) ? Number(req.query.rating) : 4;
+    
+    if(title && year && Number(year) && year.length==4){
+        movie.movies.push({ 'title': title, 'year': Number(year), 'rating': rating });
+        movie.save({}, (error, result) => {
+            if (error) console.log('error saving!!!')
+            console.log('movie added')
+        })
+        res.send({title,year,rating});
+    }
+    else{console.log("{ status: 403, error: true, message: 'you cannot create a movie without providing a title and a year' }") }
+    
+    
+});
 
-    (title && year && Number(year) && year.length==4) ?
-    movies.push({ 'title': title, 'year': Number(year), 'rating': rating }) &
-    res.send({title,year,rating}) :
-    res.send({ status: 403, error: true, message: 'you cannot create a movie without providing a title and a year' }) 
-})
-app.get('/movies/get', (req, res) => {
-    res.send({status:200, data:movies})
-})
-app.get('/movies/get/by-date', (req, res) => {
-    res.send({status:200, data:movies.sort(function(a, b){return a.year - b.year}),})
-})
-app.get('/movies/get/by-rating', (req, res) => {
-    res.send({status:200, data:movies.sort(function(a, b){return b.rating - a.rating}),})
-})
-app.get('/movies/get/by-title', (req, res) => {
-    res.send({status:200, data:movies.sort(function(a, b){return a.title - b.title}),})
-})
-app.get('/movies/get/id/:id', (req, res) => {  
-    req.params.id <= movies.length ?
-    res.send({ status: 200, data: movies[req.params.id - 1] }) :
-    res.status(404).json({ status: 404, error: true, message: `the movie ${req.params.id} does not exist` }) 
-})
 app.put('/movies/edit/:id', (req, res) => {
     ed=req.params.id;
     ti=req.query.title;
     ra=Number(req.query.rating);
-
-    if(ed <= movies.length && ti) {
-        movies[ed].title = ti;
-        res.send('movie '+ed+' edited');
-    }
-    if (ed <= movies.length && ti && ra) {
-        movies[ed].title = ti;
-        movies[ed].rating = ra;
-        res.send('movie '+ed+' edited');
-    } 
-    else {
-        res.send('{status:404, error:true, message:the movie '+ed+' does not exist}')
-    }
     
+    if(ed <= movie.movies.length && ti) {
+    movie.movies[ed].title = ti;
+    res.send('movie '+ed+' edited');
+    movie.save({}, (error, result) => {
+        if (error) console.log('error saving!!!')
+        console.log('saved')
+    });
+    }
+    if (ed <= movie.movies.length && ti && ra) {
+    movie.movies[ed].title = ti;
+    movie.movies[ed].rating = ra;
+    movie.save({}, (error, result) => {
+        if (error) console.log('error saving!!!')
+        console.log('saved')
+    });
+    console.log('movie '+ed+' edited');
+    } 
+    if(ed > movie.movies.length) {
+    console.log('{status:404, error:true, message:the movie '+ed+' does not exist}')
+    }
+   
 })
+
 app.delete('/movies/delete/:id', (req, res) => {
     de=req.params.id;
-    de <= movies.length ?
-    movies.splice(de, 1) &
+    de <= movie.movies.length ?
+    movie.movies.splice(de, 1) &
+    movie.save({}, (error, result) => {
+        if (error) console.log('error saving!!!')
+        console.log('movie saved')
+    }) &
     res.send('the movie '+de+' deleted') :
-    res.send('{status:404, error:true, message:the movie '+de+' does not exist}')
-})
+    console.log('does not exist')
+    
+});
+    
+    
 
-app.listen(port, () => {
-  console.log(`app listening at http://localhost:${port}`)
-})
+ 
